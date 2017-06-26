@@ -19,6 +19,7 @@ use CallbackFilterIterator;
 use Countable;
 use Iterator;
 use IteratorAggregate;
+use JsonSerializable;
 use League\Csv\Exception\RuntimeException;
 use SplFileObject;
 
@@ -33,7 +34,7 @@ use SplFileObject;
  * @method Generator fetchColumn(string|int $column_index) Returns the next value from a single CSV record field
  * @method Generator fetchPairs(string|int $offset_index, string|int $value_index) Fetches the next key-value pairs from the CSV document
  */
-class Reader extends AbstractCsv implements Countable, IteratorAggregate
+class Reader extends AbstractCsv implements Countable, IteratorAggregate, JsonSerializable
 {
     /**
      * @inheritdoc
@@ -192,6 +193,14 @@ class Reader extends AbstractCsv implements Countable, IteratorAggregate
     public function getIterator(): Iterator
     {
         return $this->getRecords();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonSerialize(): array
+    {
+        return iterator_to_array($this->getRecords(), false);
     }
 
     /**

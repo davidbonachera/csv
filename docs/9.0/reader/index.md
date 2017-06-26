@@ -8,16 +8,14 @@ title: CSV document Reader connection
 ~~~php
 <?php
 
-class Reader extends AbstractCsv implements Countable, IteratorAggregate
+class Reader extends AbstractCsv implements Countable, IteratorAggregate, JsonSerializable
 {
-    public function count(): int
     public function fetchAll(): array
     public function fetchColumn(string|int $columnIndex = 0): Generator
     public function fetchOne(int $offset = 0): array
     public function fetchPairs(string|int $offsetIndex = 0, string|int $valueIndex = 1): Generator
     public function getHeader(): array
     public function getHeaderOffset(): int|null
-    public function getIterator(): Iterator
     public function getRecords(array $header = []): Iterator
     public function getRecordPaddingValue(): mixed
     public function setHeaderOffset(?int $offset): self
@@ -37,7 +35,7 @@ Many examples in this reference require an CSV file. We will use the following f
     john,john,john.john@example.com
     jane,jane
 
-## CSV Header
+## CSV header
 
 You can set and retrieve the header offset as well as its corresponding record.
 
@@ -86,34 +84,7 @@ $header_offset = $csv->getHeaderOffset(); //returns 1000
 $header = $csv->getHeader(); //triggers a RuntimeException exception
 ~~~
 
-## Counting CSV records
-
-Because the `Reader` class implements the `Countable` interface you can retrieve to number of records contains in a CSV document using PHP's `count` function. 
-
-~~~php
-<?php
-
-use League\Csv\Reader;
-
-$reader = Reader::createFromPath('/path/to/my/file.csv');
-count($reader); //returns 4
-~~~
-
-If a header offset is specified, the number of records will not take into account the header record
-
-~~~php
-<?php
-
-use League\Csv\Reader;
-
-$reader = Reader::createFromPath('/path/to/my/file.csv');
-$reader->setHeaderOffset(0);
-count($reader); //returns 3
-~~~
-
-<p class="message-warning">Using the <code>Countable</code> interface is not recommended for large CSV files</p>
-
-## Iterating over CSV records
+## CSV records
 
 ~~~php
 <?php
@@ -244,7 +215,7 @@ foreach ($reader as $offset => $record) {
 }
 ~~~
 
-## CSV Record normalization
+## Records normalization
 
 The returned records are normalized using the following rules:
 
@@ -278,7 +249,7 @@ foreach ($records as $offset => $record) {
 $reader->getRecordPaddingValue(); //returns 'N/A'
 ~~~
 
-## Selecting CSV records
+## Records selection
 
 ### Simple Usage
 
@@ -329,3 +300,68 @@ $stmt = (new Statement())
 $records = $stmt->process($reader);
 //$records is a League\Csv\ResultSet object
 ~~~
+
+## Records count
+
+Because the `Reader` class implements the `Countable` interface you can retrieve to number of records contains in a CSV document using PHP's `count` function.
+
+~~~php
+<?php
+
+use League\Csv\Reader;
+
+$reader = Reader::createFromPath('/path/to/my/file.csv');
+count($reader); //returns 4
+~~~
+
+If a header offset is specified, the number of records will not take into account the header record
+
+~~~php
+<?php
+
+use League\Csv\Reader;
+
+$reader = Reader::createFromPath('/path/to/my/file.csv');
+$reader->setHeaderOffset(0);
+count($reader); //returns 3
+~~~
+
+<p class="message-warning">Using the <code>Countable</code> interface is not recommended for large CSV files as <code>iterator_count</code> is used internally.</p>
+
+## Records conversion
+
+The `Reader` class implements the `JsonSerializable` interface. As such you can use the `json_encode` function directly on the instantiated object.
+
+The returned JSON string data :
+
+- depends on the presence or absence of a header.
+- does not preserve the record offset
+
+~~~php
+<?php
+
+use League\Csv\Reader;
+
+$expected = [
+    ['firstname', 'lastname', 'e-mail', 'phone'],
+    ['john', 'doe', 'john.doe@example.com', '0123456789'],
+];
+
+$tmp = new SplTempFileObject();
+foreach ($expected as $row) {
+    $tmp->fputcsv($row);
+}
+
+$reader = Reader::createFromFileObject($tmp);
+echo json_encode($reader);
+//display [["First Name","Last Name","E-mail"],["john","doe","john.doe@example.com"]]
+$reader->setHeaderOffset(0);
+echo json_encode($reader);
+//display [{"First Name":"john","Last Name":"doe","E-mail":"john.doe@example.com"}]
+~~~
+
+<p class="message-notice">To convert your CSV to <code>JSON</code> you must be sure its content is <code>UTF-8</code> using, for instance, the library <a href="/9.0/converter/charset/">CharsetConverter</a> stream filter</p>
+
+<p class="message-warning">Using the <code>JsonSerializable</code> interface is not recommended for large CSV files as <code>iterator_to_array</code> is used internally.</p>
+
+<p class="message-info">If you wish to convert your CSV document in <code>XML</code> or <code>HTML</code> please refer to the <a href="/9.0/converter">converters</a> bundled with this library.</p>

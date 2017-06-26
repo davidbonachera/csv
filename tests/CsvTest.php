@@ -2,7 +2,7 @@
 
 namespace LeagueTest\Csv;
 
-use League\Csv\Exception\InvalidArgumentException;
+use League\Csv\Exception\LengthException;
 use League\Csv\Exception\OutOfRangeException;
 use League\Csv\Exception\RuntimeException;
 use League\Csv\Reader;
@@ -170,7 +170,7 @@ class CsvTest extends TestCase
      */
     public function testDelimeter()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(LengthException::class);
         $this->csv->setDelimiter('o');
         $this->assertSame('o', $this->csv->getDelimiter());
         $this->csv->setDelimiter('foo');
@@ -220,7 +220,7 @@ class CsvTest extends TestCase
      */
     public function testEscape()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(LengthException::class);
         $this->csv->setEscape('o');
         $this->assertSame('o', $this->csv->getEscape());
 
@@ -233,7 +233,7 @@ class CsvTest extends TestCase
      */
     public function testEnclosure()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(LengthException::class);
         $this->csv->setEnclosure('o');
         $this->assertSame('o', $this->csv->getEnclosure());
 

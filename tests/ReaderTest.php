@@ -323,4 +323,12 @@ class ReaderTest extends TestCase
             $this->assertSame($keys, array_keys($record));
         }
     }
+
+    /**
+     * @covers ::jsonSerialize
+     */
+    public function testJsonSerialize()
+    {
+        $this->assertSame(json_encode($this->expected, false), json_encode($this->csv));
+    }
 }

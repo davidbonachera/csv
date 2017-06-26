@@ -29,7 +29,7 @@ try {
 
 ### While setting properties
 
-Setter methods will throw an `InvalidArgumentException` if the submitted value is invalid except for the `createFromPath` which can also triggers a `RuntimeException` if the filename cannot be opened  like [SplFileObject](http://php.net/manual/en/splfileobject.construct.php).
+Setter methods will throw an `LengthException` if the submitted value is invalid except for the `createFromPath` which can also triggers a `RuntimeException` if the filename cannot be opened  like [SplFileObject](http://php.net/manual/en/splfileobject.construct.php).
 
 ~~~php
 <?php
@@ -38,8 +38,8 @@ use League\Csv\Reader;
 
 try {
     $csv = Reader::createFromPath('/path/to/file.csv'); //may trigger a RuntimeException
-    $csv->setDelimiter('toto'); //may trigger a InvalidArgumentException
-} catch (InvalidArgumentException $e) {
+    $csv->setDelimiter('toto'); //may trigger a LengthException
+} catch (LengthException $e) {
     echo $e->getMessage(), PHP_EOL;
 } catch (RuntimeException $e) {
     echo $e->getMessage(), PHP_EOL;
@@ -50,7 +50,7 @@ try {
 try {
     $csv = Reader::createFromPath('/path/to/file.csv');
     $csv->setDelimiter('toto');
-} catch (InvalidArgumentException | RuntimeException $e) {
+} catch (LengthException | RuntimeException $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 ~~~
